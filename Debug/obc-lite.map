@@ -3680,8 +3680,9 @@ LOAD C:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .bss.huart2    0x20000238       0x48 ./Core/Src/main.o
                 0x20000238                huart2
  .bss.temperature_adc_value
-                0x20000280        0x4 ./Core/Src/main.o
+                0x20000280        0x2 ./Core/Src/main.o
                 0x20000280                temperature_adc_value
+ *fill*         0x20000282        0x2 
  .bss.temperature_in_c
                 0x20000284        0x4 ./Core/Src/main.o
                 0x20000284                temperature_in_c

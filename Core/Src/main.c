@@ -65,7 +65,7 @@ static void MX_ADC1_Init(void);
 #define TEMP_V25 0.76
 #define TEMP_VSENSE 3.3/4096
 
-uint32_t temperature_adc_value = 0;
+uint16_t temperature_adc_value = 0;
 float temperature_in_c = 0.0;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {

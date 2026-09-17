@@ -1279,7 +1279,7 @@ Disassembly of section .text:
 08000fb8 <HAL_ADC_ConvCpltCallback>:
 #define TEMP_VSENSE 3.3/4096
 
-uint32_t temperature_adc_value = 0;
+uint16_t temperature_adc_value = 0;
 float temperature_in_c = 0.0;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
@@ -1291,54 +1291,54 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
  8000fc0:	6878      	ldr	r0, [r7, #4]
  8000fc2:	f000 fea3 	bl	8001d0c <HAL_ADC_GetValue>
  8000fc6:	4603      	mov	r3, r0
- 8000fc8:	4a21      	ldr	r2, [pc, #132]	@ (8001050 <HAL_ADC_ConvCpltCallback+0x98>)
- 8000fca:	6013      	str	r3, [r2, #0]
+ 8000fc8:	b29a      	uxth	r2, r3
+ 8000fca:	4b21      	ldr	r3, [pc, #132]	@ (8001050 <HAL_ADC_ConvCpltCallback+0x98>)
+ 8000fcc:	801a      	strh	r2, [r3, #0]
 	temperature_in_c = ((TEMP_VSENSE * temperature_adc_value - TEMP_V25) / TEMP_AVG_SLOPE) + 25;
- 8000fcc:	4b20      	ldr	r3, [pc, #128]	@ (8001050 <HAL_ADC_ConvCpltCallback+0x98>)
- 8000fce:	681b      	ldr	r3, [r3, #0]
- 8000fd0:	4618      	mov	r0, r3
- 8000fd2:	f7ff fab7 	bl	8000544 <__aeabi_ui2d>
- 8000fd6:	a318      	add	r3, pc, #96	@ (adr r3, 8001038 <HAL_ADC_ConvCpltCallback+0x80>)
- 8000fd8:	e9d3 2300 	ldrd	r2, r3, [r3]
- 8000fdc:	f7ff fb2c 	bl	8000638 <__aeabi_dmul>
- 8000fe0:	4602      	mov	r2, r0
- 8000fe2:	460b      	mov	r3, r1
- 8000fe4:	4610      	mov	r0, r2
- 8000fe6:	4619      	mov	r1, r3
- 8000fe8:	a315      	add	r3, pc, #84	@ (adr r3, 8001040 <HAL_ADC_ConvCpltCallback+0x88>)
- 8000fea:	e9d3 2300 	ldrd	r2, r3, [r3]
- 8000fee:	f7ff f96b 	bl	80002c8 <__aeabi_dsub>
- 8000ff2:	4602      	mov	r2, r0
- 8000ff4:	460b      	mov	r3, r1
- 8000ff6:	4610      	mov	r0, r2
- 8000ff8:	4619      	mov	r1, r3
- 8000ffa:	a313      	add	r3, pc, #76	@ (adr r3, 8001048 <HAL_ADC_ConvCpltCallback+0x90>)
- 8000ffc:	e9d3 2300 	ldrd	r2, r3, [r3]
- 8001000:	f7ff fc44 	bl	800088c <__aeabi_ddiv>
- 8001004:	4602      	mov	r2, r0
- 8001006:	460b      	mov	r3, r1
- 8001008:	4610      	mov	r0, r2
- 800100a:	4619      	mov	r1, r3
- 800100c:	f04f 0200 	mov.w	r2, #0
- 8001010:	4b10      	ldr	r3, [pc, #64]	@ (8001054 <HAL_ADC_ConvCpltCallback+0x9c>)
- 8001012:	f7ff f95b 	bl	80002cc <__adddf3>
- 8001016:	4602      	mov	r2, r0
- 8001018:	460b      	mov	r3, r1
- 800101a:	4610      	mov	r0, r2
- 800101c:	4619      	mov	r1, r3
- 800101e:	f7ff fde3 	bl	8000be8 <__aeabi_d2f>
- 8001022:	4603      	mov	r3, r0
- 8001024:	4a0c      	ldr	r2, [pc, #48]	@ (8001058 <HAL_ADC_ConvCpltCallback+0xa0>)
- 8001026:	6013      	str	r3, [r2, #0]
+ 8000fce:	4b20      	ldr	r3, [pc, #128]	@ (8001050 <HAL_ADC_ConvCpltCallback+0x98>)
+ 8000fd0:	881b      	ldrh	r3, [r3, #0]
+ 8000fd2:	4618      	mov	r0, r3
+ 8000fd4:	f7ff fac6 	bl	8000564 <__aeabi_i2d>
+ 8000fd8:	a317      	add	r3, pc, #92	@ (adr r3, 8001038 <HAL_ADC_ConvCpltCallback+0x80>)
+ 8000fda:	e9d3 2300 	ldrd	r2, r3, [r3]
+ 8000fde:	f7ff fb2b 	bl	8000638 <__aeabi_dmul>
+ 8000fe2:	4602      	mov	r2, r0
+ 8000fe4:	460b      	mov	r3, r1
+ 8000fe6:	4610      	mov	r0, r2
+ 8000fe8:	4619      	mov	r1, r3
+ 8000fea:	a315      	add	r3, pc, #84	@ (adr r3, 8001040 <HAL_ADC_ConvCpltCallback+0x88>)
+ 8000fec:	e9d3 2300 	ldrd	r2, r3, [r3]
+ 8000ff0:	f7ff f96a 	bl	80002c8 <__aeabi_dsub>
+ 8000ff4:	4602      	mov	r2, r0
+ 8000ff6:	460b      	mov	r3, r1
+ 8000ff8:	4610      	mov	r0, r2
+ 8000ffa:	4619      	mov	r1, r3
+ 8000ffc:	a312      	add	r3, pc, #72	@ (adr r3, 8001048 <HAL_ADC_ConvCpltCallback+0x90>)
+ 8000ffe:	e9d3 2300 	ldrd	r2, r3, [r3]
+ 8001002:	f7ff fc43 	bl	800088c <__aeabi_ddiv>
+ 8001006:	4602      	mov	r2, r0
+ 8001008:	460b      	mov	r3, r1
+ 800100a:	4610      	mov	r0, r2
+ 800100c:	4619      	mov	r1, r3
+ 800100e:	f04f 0200 	mov.w	r2, #0
+ 8001012:	4b10      	ldr	r3, [pc, #64]	@ (8001054 <HAL_ADC_ConvCpltCallback+0x9c>)
+ 8001014:	f7ff f95a 	bl	80002cc <__adddf3>
+ 8001018:	4602      	mov	r2, r0
+ 800101a:	460b      	mov	r3, r1
+ 800101c:	4610      	mov	r0, r2
+ 800101e:	4619      	mov	r1, r3
+ 8001020:	f7ff fde2 	bl	8000be8 <__aeabi_d2f>
+ 8001024:	4603      	mov	r3, r0
+ 8001026:	4a0c      	ldr	r2, [pc, #48]	@ (8001058 <HAL_ADC_ConvCpltCallback+0xa0>)
+ 8001028:	6013      	str	r3, [r2, #0]
 	HAL_ADC_Start_IT(&hadc1);
- 8001028:	480c      	ldr	r0, [pc, #48]	@ (800105c <HAL_ADC_ConvCpltCallback+0xa4>)
- 800102a:	f000 fc81 	bl	8001930 <HAL_ADC_Start_IT>
+ 800102a:	480c      	ldr	r0, [pc, #48]	@ (800105c <HAL_ADC_ConvCpltCallback+0xa4>)
+ 800102c:	f000 fc80 	bl	8001930 <HAL_ADC_Start_IT>
 }
- 800102e:	bf00      	nop
- 8001030:	3708      	adds	r7, #8
- 8001032:	46bd      	mov	sp, r7
- 8001034:	bd80      	pop	{r7, pc}
- 8001036:	bf00      	nop
+ 8001030:	bf00      	nop
+ 8001032:	3708      	adds	r7, #8
+ 8001034:	46bd      	mov	sp, r7
+ 8001036:	bd80      	pop	{r7, pc}
  8001038:	66666666 	.word	0x66666666
  800103c:	3f4a6666 	.word	0x3f4a6666
  8001040:	851eb852 	.word	0x851eb852
