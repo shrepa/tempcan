@@ -1,13 +1,1 @@
-Debug/
-*.elf
-*.o
-*.bin
-*.hex
-*.map
-*.d
-*.a
-*.su
-*.lst
-*.launch
-*.log
-*.metadata/
+Debug
