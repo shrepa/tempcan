@@ -43,10 +43,16 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+CAN_HandleTypeDef hcan1;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+CAN_TxHeaderTypeDef TxHeader; //Header containing the information of the transmitted frame
+CAN_RxHeaderTypeDef RxHeader; //Header containing the information of the received frame
+uint8_t TxData[8] = {0}; //buffer of data to send
+uint8_t RxData[8]; //buffer of received data
+uint32_t TxMailBox; //the number of mail boxes that transmitted the Tx message
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,6 +60,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_CAN1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -106,26 +113,42 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
+  MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
+  TxHeader.StdId = 0x123;
+  TxHeader.RTR = CAN_RTR_DATA;
+  TxHeader.IDE = CAN_ID_STD;
+  TxHeader.DLC = 8;
+  TxHeader.TransmitGlobalTime = DISABLE;
+  TxData[0] = 0;
+  TxData[7] = 0xFF;
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  char output_buffer[128] = {0};
-  uint32_t print_tick = HAL_GetTick();
+  //char output_buffer[128] = {0};
+  //uint32_t print_tick = HAL_GetTick();
 
-  HAL_ADC_Start_IT(&hadc1);
+  //HAL_ADC_Start_IT(&hadc1);
 
   while (1)
   {
-	  if (HAL_GetTick() - print_tick >= 1000) {
-		  sprintf(output_buffer, "temperature: %f\r\n", temperature_in_c);
-		  size_t size = strlen(output_buffer);
-		  HAL_UART_Transmit(&huart2, (uint8_t*)output_buffer, size, 1000);
-		  memset(output_buffer, 0, 128);
-		  print_tick = HAL_GetTick();
+//	  if (HAL_GetTick() - print_tick >= 1000) {
+//		  sprintf(output_buffer, "temperature: %f\r\n", temperature_in_c);
+//		  size_t size = strlen(output_buffer);
+//		  HAL_UART_Transmit(&huart2, (uint8_t*)output_buffer, size, 1000);
+//		  memset(output_buffer, 0, 128);
+//		  print_tick = HAL_GetTick();
+//	  }
+	  TxData[0] ++; //Increment first byte
+	  TxData[7] --; //Increment second byte
+
+	  while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0); //wait till Tx Mailbox is free
+	  if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailBox) != HAL_OK) {
+		  Error_Handler();
 	  }
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -234,7 +257,7 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -250,6 +273,70 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief CAN1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_CAN1_Init(void)
+{
+
+  /* USER CODE BEGIN CAN1_Init 0 */
+  CAN_FilterTypeDef sFilterConfig;
+  /* USER CODE END CAN1_Init 0 */
+
+  /* USER CODE BEGIN CAN1_Init 1 */
+
+  /* USER CODE END CAN1_Init 1 */
+  hcan1.Instance = CAN1;
+  hcan1.Init.Prescaler = 4;
+  hcan1.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_16TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_4TQ;
+  hcan1.Init.TimeTriggeredMode = DISABLE;
+  hcan1.Init.AutoBusOff = DISABLE;
+  hcan1.Init.AutoWakeUp = DISABLE;
+  hcan1.Init.AutoRetransmission = DISABLE;
+  hcan1.Init.ReceiveFifoLocked = DISABLE;
+  hcan1.Init.TransmitFifoPriority = DISABLE;
+  if (HAL_CAN_Init(&hcan1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN CAN1_Init 2 */
+  /* The CAN filter configuration */
+   sFilterConfig.FilterBank = 0;
+   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+   sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+   sFilterConfig.FilterIdHigh = 0x0000;
+   sFilterConfig.FilterIdLow = 0x0000;
+   sFilterConfig.FilterMaskIdHigh = 0x0000;
+   sFilterConfig.FilterMaskIdLow = 0x0000;
+   sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0; /* The data will be received in FIFO0 */
+   sFilterConfig.FilterActivation = ENABLE;
+   sFilterConfig.SlaveStartFilterBank = 14;
+   if (HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
+   {
+   /* Filter configuration Error */
+   Error_Handler();
+   }
+   /* Starting the CAN peripheral */
+   if (HAL_CAN_Start(&hcan1) != HAL_OK)
+   {
+   /* Start Error */
+   Error_Handler();
+   }
+   /* Activate CAN RX notification on FIFO0 */
+   if (HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
+   {
+   /* Notification Error */
+   Error_Handler();
+   }
+  /* USER CODE END CAN1_Init 2 */
 
 }
 
@@ -326,7 +413,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *CanHandle)
+{
+ /* Get RX message */
+ if (HAL_CAN_GetRxMessage(CanHandle, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+ {
+ /* Reception Error */
+ Error_Handler();
+ }
+}
 /* USER CODE END 4 */
 
 /**
