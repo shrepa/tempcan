@@ -72,8 +72,8 @@ static void MX_CAN1_Init(void);
 #define TEMP_V25 0.76
 #define TEMP_VSENSE 3.3/4096
 
-uint16_t temperature_adc_value = 0;
-float temperature_in_c = 0.0;
+volatile uint16_t temperature_adc_value = 0;
+volatile float temperature_in_c = 0.0;
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 	temperature_adc_value = HAL_ADC_GetValue(hadc);
@@ -122,16 +122,17 @@ int main(void)
   TxHeader.TransmitGlobalTime = DISABLE;
   TxData[0] = 0;
   TxData[7] = 0xFF;
+  if (HAL_ADC_Start_IT(&hadc1) != HAL_OK) {
+    Error_Handler();
+  }
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //char output_buffer[128] = {0};
-  //uint32_t print_tick = HAL_GetTick();
-
-  //HAL_ADC_Start_IT(&hadc1);
-
+//  char output_buffer[128] = {0};
+  uint32_t print_tick = HAL_GetTick();
+//
   while (1)
   {
 //	  if (HAL_GetTick() - print_tick >= 1000) {
@@ -141,12 +142,14 @@ int main(void)
 //		  memset(output_buffer, 0, 128);
 //		  print_tick = HAL_GetTick();
 //	  }
-	  TxData[0] ++; //Increment first byte
-	  TxData[7] --; //Increment second byte
 
-	  while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0); //wait till Tx Mailbox is free
-	  if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailBox) != HAL_OK) {
-		  Error_Handler();
+	  if (HAL_GetTick() - print_tick >= 1000) {
+		  TxData[0] = temperature_in_c;
+		  while(HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0); //wait till Tx Mailbox is free
+		  if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailBox) != HAL_OK) {
+		  		  Error_Handler();
+		  	  }
+		  print_tick = HAL_GetTick();
 	  }
 
     /* USER CODE END WHILE */
@@ -227,13 +230,13 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = ENABLE;
+  hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.NbrOfConversion = 1;
   hadc1.Init.DMAContinuousRequests = DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -257,19 +260,12 @@ static void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
 
-  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
-  sConfig.Rank = 2;
-  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
