@@ -1,1 +1,36 @@
-Debug
+# ---- STM32CubeIDE build output ----
+Debug/
+Release/
+Build/
+build/
+*.o
+*.d
+*.su
+*.cyclo
+*.elf
+*.map
+*.list
+*.bin
+*.hex
+*.srec
+*.a
+
+# ---- Debugger / IDE local files (machine-specific) ----
+*.launch
+st-link_gdbserver_log.txt
+.metadata/
+.settings/
+RemoteSystemsTempFiles/
+.vscode/
+.idea/
+
+# ---- Logs & temp ----
+*.log
+*.tmp
+*.swp
+*~
+
+# ---- OS junk ----
+.DS_Store
+Thumbs.db
+desktop.ini
